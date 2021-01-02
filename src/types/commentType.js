@@ -13,7 +13,7 @@ const commentType = new GraphQLObjectType({
     author: {
       type: userType,
       async resolve(parent) {
-        return await User.findById(parent.authorID);
+        return await User.findById(parent.authorId);
       },
     },
     post: {

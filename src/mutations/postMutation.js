@@ -12,13 +12,12 @@ export const createPost = {
   async resolve(parent, args, req) {
     if (!req.verifiedUser) throw new Error('Unauthorized');
 
-    const post = new Post({
-      title: args.title,
-      body: args.body,
-      authorId: req.verifiedUser._id,
-    });
-
     try {
+      const post = new Post({
+        title: args.title,
+        body: args.body,
+        authorId: req.verifiedUser._id,
+      });
       return await post.save();
     } catch (error) {
       console.log(error.message);
@@ -37,15 +36,16 @@ export const updatePost = {
   async resolve(parent, args, req) {
     if (!req.verifiedUser) throw new Error('Unauthorized');
 
-    const post = await Post.findOneAndUpdate(
-      { _id: args.postId, authorId: req.verifiedUser._id },
-      { title: args.title, body: args.body },
-      { new: true, validators: true }
-    );
-
-    if (!post) throw new Error('Post does not exist.');
-
-    return await post;
+    try {
+      const post = await Post.findOneAndUpdate(
+        { _id: args.postId, authorId: req.verifiedUser._id },
+        { title: args.title, body: args.body },
+        { new: true, validators: true }
+      );
+      return post;
+    } catch (error) {
+      throw new Error('Post does not exist.');
+    }
   },
 };
 
@@ -58,13 +58,14 @@ export const deletePost = {
   async resolve(parent, args, req) {
     if (!req.verifiedUser) throw new Error('Unauthorized');
 
-    const post = await Post.findOneAndDelete({
-      _id: args.postId,
-      authorId: req.verifiedUser._id,
-    });
-
-    if (!post) throw new Error('Post does not exist.');
-
-    return 'Post deleted.';
+    try {
+      await Post.findOneAndDelete({
+        _id: args.postId,
+        authorId: req.verifiedUser._id,
+      });
+      return 'Post deleted.';
+    } catch (error) {
+      throw new Error('Post does not exist.');
+    }
   },
 };

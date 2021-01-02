@@ -6,7 +6,11 @@ export const users = {
   type: GraphQLList(userType),
   description: 'Get all users',
   async resolve() {
-    return await User.find();
+    try {
+      return await User.find();
+    } catch (error) {
+      throw new Error(error.message);
+    }
   },
 };
 
@@ -17,6 +21,11 @@ export const user = {
     id: { type: GraphQLID },
   },
   async resolve(parent, args) {
-    return await User.findById(args.id);
+    try {
+      return await User.findById(args.id);
+    } catch (error) {
+      console.log(error.message);
+      throw new Error('User not found');
+    }
   },
 };

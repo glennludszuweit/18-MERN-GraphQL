@@ -14,15 +14,19 @@ export const register = {
     const salt = await bcrypt.genSalt(10);
     const securedPass = await bcrypt.hash(args.password, salt);
 
-    const user = new User({
-      name: args.name,
-      email: args.email,
-      password: securedPass,
-    });
+    try {
+      const user = new User({
+        name: args.name,
+        email: args.email,
+        password: securedPass,
+      });
 
-    await user.save();
-    const token = createJWT(user);
-    return token;
+      await user.save();
+      const token = createJWT(user);
+      return token;
+    } catch (error) {
+      throw new Error(error.message);
+    }
   },
 };
 
@@ -33,13 +37,17 @@ export const login = {
     password: { type: GraphQLString },
   },
   async resolve(parent, args) {
-    const user = await User.findOne({ email: args.email });
-    if (!user) throw new Error('Incorrect email');
+    try {
+      const user = await User.findOne({ email: args.email });
+      if (!user) throw new Error('Incorrect email');
 
-    const checkPass = await bcrypt.compare(args.password, user.password);
-    if (!checkPass) throw new Error('Invalid password.');
+      const checkPass = await bcrypt.compare(args.password, user.password);
+      if (!checkPass) throw new Error('Invalid password.');
 
-    const token = createJWT(user);
-    return token;
+      const token = createJWT(user);
+      return token;
+    } catch (error) {
+      throw new Error(error.message);
+    }
   },
 };
